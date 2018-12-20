@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import psycopg2
 
 DBNAME = 'news'
@@ -21,11 +23,13 @@ query2 = '''select authors.name, count(*) as views
 # 3. On which days did more than 1% of requests lead to errors?
 query3 = '''select * from (
             select date(time) as day,
-            round(100.0*sum(case when status like '%404%' then 1 else 0 end)/count(*), 2) as error_percent
+            round(100.0*sum(case when status like '%404%' then 1 else 0 end)
+                /count(*), 2) as error_percent
             from log
             group by day
             order by error_percent) as subq
             where error_percent > 1'''
+
 
 def run_query(query):
     db = psycopg2.connect(database=DBNAME)
@@ -35,11 +39,13 @@ def run_query(query):
     return results
     db.close()
 
+
 def print_query1_results(query):
     results = run_query(query)
     print('\n1. The three most popular articles of all time are:\n')
     for result in results:
         print('\t' + str(result[0]) + ' - ' + str(result[1]) + ' views\n')
+
 
 def print_query2_results(query):
     results = run_query(query)
@@ -47,11 +53,13 @@ def print_query2_results(query):
     for result in results:
         print('\t' + str(result[0]) + ' - ' + str(result[1]) + ' views\n')
 
+
 def print_query3_results(query):
     results = run_query(query)
     print('\n3. Days with over 1% of requests that lead to an error are:\n')
     for result in results:
         print('\t' + str(result[0]) + ' - ' + str(result[1]) + '%\n')
+
 
 print_query1_results(query1)
 print_query2_results(query2)
